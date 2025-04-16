@@ -72,7 +72,7 @@
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
     const sheetName = 'Sheet1';
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}&cacheBuster=${Date.now()}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
 
     fetch(url)
       .then(response => response.json())
