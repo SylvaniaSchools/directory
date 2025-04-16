@@ -109,8 +109,7 @@
             const cellText = row[index] || '';
             const td = document.createElement('td');
 
-            // Check if it's an image URL and display the image
-            if (typeof cellText === 'string' && cellText.match(/^https?:\/\/.*\.(jpeg|jpg|png|gif|webp|svg)(\?.*)?$/i)) {
+            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
               const img = document.createElement('img');
               img.src = cellText;
               img.alt = 'Image';
