@@ -10,6 +10,16 @@
       background: #f4f4f4;
     }
 
+    #searchBox {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
     table {
       width: 100%;
       max-width: 900px;
@@ -41,12 +51,18 @@
       max-height: 80px;
       cursor: pointer;
     }
+
+    tr.hide {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
+  <input type="text" id="searchBox" placeholder="Search table...">
+
   <table id="sheetTable">
-    <caption>Live Data from Google Sheet</caption>
+    <caption>Sylvania Schools Staff Directory</caption>
     <thead></thead>
     <tbody></tbody>
   </table>
@@ -72,7 +88,7 @@
           return;
         }
 
-        // First row = headers
+        // Header
         const headerRow = document.createElement('tr');
         rows[0].forEach(headerText => {
           const th = document.createElement('th');
@@ -81,13 +97,13 @@
         });
         thead.appendChild(headerRow);
 
-        // Remaining rows = data
+        // Data
         rows.slice(1).forEach(row => {
           const tr = document.createElement('tr');
           row.forEach(cellText => {
             const td = document.createElement('td');
 
-            // If cell contains an image URL, render an <img> tag
+            // If it's an image URL, render the image
             if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
               const img = document.createElement('img');
               img.src = cellText;
@@ -102,6 +118,19 @@
             tr.appendChild(td);
           });
           tbody.appendChild(tr);
+        });
+
+        // Add search functionality
+        const searchInput = document.getElementById('searchBox');
+        searchInput.addEventListener('input', function () {
+          const query = this.value.toLowerCase();
+          const rows = tbody.querySelectorAll('tr');
+
+          rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            const match = cells.some(td => td.textContent.toLowerCase().includes(query));
+            row.classList.toggle('hide', !match);
+          });
         });
       })
       .catch(error => {
