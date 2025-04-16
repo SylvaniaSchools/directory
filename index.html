@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Live Google Sheet Table</title>
+  <title>Sylvania Schools Staff Directory</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -62,7 +62,7 @@
   <input type="text" id="searchBox" placeholder="Search table...">
 
   <table id="sheetTable">
-    <caption>Live Data from Google Sheet</caption>
+    <caption>Sylvania Schools Staff Directory</caption>
     <thead></thead>
     <tbody></tbody>
   </table>
@@ -72,7 +72,7 @@
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
     const sheetName = 'Sheet1';
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}&cacheBuster=${Date.now()}`;
 
     fetch(url)
       .then(response => response.json())
@@ -82,29 +82,35 @@
         const tbody = table.querySelector('tbody');
 
         const rows = data.values;
+        const hiddenColumns = ["Check Value"];
+        const visibleColumnIndexes = [];
 
         if (!rows || rows.length === 0) {
           table.innerHTML = '<tr><td>No data found</td></tr>';
           return;
         }
 
-        // Header
+        // Header row
         const headerRow = document.createElement('tr');
-        rows[0].forEach(headerText => {
-          const th = document.createElement('th');
-          th.textContent = headerText;
-          headerRow.appendChild(th);
+        rows[0].forEach((headerText, index) => {
+          if (!hiddenColumns.includes(headerText)) {
+            const th = document.createElement('th');
+            th.textContent = headerText;
+            headerRow.appendChild(th);
+            visibleColumnIndexes.push(index); // keep track of visible columns
+          }
         });
         thead.appendChild(headerRow);
 
-        // Data
+        // Data rows
         rows.slice(1).forEach(row => {
           const tr = document.createElement('tr');
-          row.forEach(cellText => {
+          visibleColumnIndexes.forEach(index => {
+            const cellText = row[index] || '';
             const td = document.createElement('td');
 
-            // If it's an image URL, render the image
-            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+            // Check if it's an image URL and display the image
+            if (typeof cellText === 'string' && cellText.match(/^https?:\/\/.*\.(jpeg|jpg|png|gif|webp|svg)(\?.*)?$/i)) {
               const img = document.createElement('img');
               img.src = cellText;
               img.alt = 'Image';
@@ -120,7 +126,7 @@
           tbody.appendChild(tr);
         });
 
-        // Add search functionality
+        // Search filter
         const searchInput = document.getElementById('searchBox');
         searchInput.addEventListener('input', function () {
           const query = this.value.toLowerCase();
