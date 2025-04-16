@@ -35,6 +35,12 @@
       font-size: 1.5em;
       font-weight: bold;
     }
+
+    img {
+      max-width: 100px;
+      max-height: 80px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -48,9 +54,9 @@
   <script>
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
-    const sheetName = 'Sheet1'; // Your sheet name is 'Sheet1'
+    const sheetName = 'Sheet1';
 
-     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
 
     fetch(url)
       .then(response => response.json())
@@ -80,7 +86,19 @@
           const tr = document.createElement('tr');
           row.forEach(cellText => {
             const td = document.createElement('td');
-            td.textContent = cellText;
+
+            // If cell contains an image URL, render an <img> tag
+            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+              const img = document.createElement('img');
+              img.src = cellText;
+              img.alt = 'Image';
+              img.title = 'Click to view full-size';
+              img.onclick = () => window.open(cellText, '_blank');
+              td.appendChild(img);
+            } else {
+              td.textContent = cellText;
+            }
+
             tr.appendChild(td);
           });
           tbody.appendChild(tr);
