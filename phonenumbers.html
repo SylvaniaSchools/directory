@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Contact Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        select, p {
+            font-size: 16px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>School Contact Information</h1>
+    <label for="school-select">Select a school:</label>
+    <select id="school-select">
+        <option value="">-- Select --</option>
+        <option value="arbor-hills">Arbor Hills Junior High</option>
+        <option value="central-trail">Central Trail Elementary</option>
+        <option value="highland">Highland Elementary</option>
+        <option value="hill-view">Hill View Elementary</option>
+        <option value="maplewood">Maplewood Elementary</option>
+        <option value="mccord">McCord Junior High</option>
+        <option value="northview">Northview High School</option>
+        <option value="southview">Southview High School</option>
+        <option value="stranahan">Stranahan Elementary</option>
+        <option value="sylvan">Sylvan Elementary</option>
+        <option value="timberstone">Timberstone Junior High</option>
+        <option value="whiteford">Whiteford Elementary</option>
+        <option value="admin-building">Administration Building</option>
+        <option value="transportation">Transportation</option>
+    </select>
+
+    <p id="contact-info"></p>
+
+    <script>
+        const schoolData = {
+            'arbor-hills': 'Arbor Hills Junior High\nPhone: 419-824-8640; Guidance Office, x4104',
+            'central-trail': 'Central Trail Elementary\nPhone: 419-824-8610',
+            'highland': 'Highland Elementary\nPhone: 419-824-8611',
+            'hill-view': 'Hill View Elementary\nPhone: 419-824-8612',
+            'maplewood': 'Maplewood Elementary\nPhone: 419-824-8613',
+            'mccord': 'McCord Junior High\nPhone: 419-824-8650; Guidance Office, x4298',
+            'northview': 'Northview High School\nPhone: 419-824-8570\nLink to Guidance Office\nAth
