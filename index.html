@@ -179,13 +179,6 @@
 </head>
 <body>
 
-  <div class="multi-select-dropdown">
-    <button>Filter Buildings</button>
-    <div class="multi-select-dropdown-content">
-      <!-- Dropdown content will be populated dynamically -->
-    </div>
-  </div>
-
   <div class="table-container">
     <table id="sheetTable">
       <caption>Sylvania Schools Staff Directory</caption>
@@ -221,6 +214,7 @@
           return;
         }
 
+        // Create header row
         const headerRow = document.createElement('tr');
         const filterRow = document.createElement('tr');
 
@@ -233,15 +227,14 @@
 
             const filterTh = document.createElement('th');
             if (headerText.toLowerCase() === "building") {
+              // Add dropdown filter in building column
               const wrapper = document.createElement('div');
               wrapper.className = 'multi-select-dropdown';
-
               const button = document.createElement('button');
               button.textContent = 'Filter Buildings';
 
               const dropdown = document.createElement('div');
               dropdown.className = 'multi-select-dropdown-content';
-
               wrapper.appendChild(button);
               wrapper.appendChild(dropdown);
               filterTh.appendChild(wrapper);
@@ -260,6 +253,7 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
+        // Populate table with data
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
           visibleColumnIndexes.forEach(index => {
@@ -315,12 +309,10 @@
             .map(checkbox => checkbox.value.toLowerCase());
 
           allDataRows.forEach(row => {
-            const buildingCell = row.querySelector('td:nth-child(1)'); // assuming building is in the first column
+            const buildingCell = row.querySelector('td:nth-child(2)'); // assuming building is in the second column
             if (buildingCell) {
               const staffBuildings = buildingCell.textContent.toLowerCase().split(',').map(b => b.trim());
-
               const matches = selectedBuildings.some(building => staffBuildings.includes(building));
-
               row.classList.toggle('hide', !matches);
             }
           });
