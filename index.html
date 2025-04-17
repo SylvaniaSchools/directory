@@ -3,30 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Sylvania Schools Staff Directory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 40px;
+      padding: 20px;
+      margin: 0;
       background: #f4f4f4;
     }
 
     #searchBox {
       display: block;
-      margin: 0 auto 20px auto;
+      width: 90%;
       max-width: 400px;
+      margin: 0 auto 20px auto;
       padding: 10px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
 
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+
     table {
-      width: 80%;
-      max-width: 500px;
+      width: 100%;
+      max-width: 700px;
       margin: auto;
       border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      min-width: 500px;
     }
 
     th, td {
@@ -75,6 +84,8 @@
       display: block;
       max-width: 90%;
       max-height: 80%;
+      width: auto;
+      height: auto;
     }
 
     #lightbox-modal span {
@@ -86,17 +97,41 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+
+      caption {
+        font-size: 1.2em;
+      }
+
+      img {
+        max-width: 80px;
+        max-height: 60px;
+      }
+
+      #lightbox-modal span {
+        font-size: 30px;
+        top: 10px;
+        right: 20px;
+      }
+    }
   </style>
 </head>
 <body>
 
   <input type="text" id="searchBox" placeholder="Search table...">
 
-  <table id="sheetTable">
-    <caption>Sylvania Schools Staff Directory</caption>
-    <thead></thead>
-    <tbody></tbody>
-  </table>
+  <div class="table-container">
+    <table id="sheetTable">
+      <caption>Sylvania Schools Staff Directory</caption>
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <!-- Lightbox Modal HTML -->
   <div id="lightbox-modal">
