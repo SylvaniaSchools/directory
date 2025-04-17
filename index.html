@@ -51,7 +51,7 @@
       word-break: normal;
       overflow-wrap: break-word;
       vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
+      font-size: clamp(12px, 2vw, 16px);
     }
 
     th {
@@ -59,7 +59,7 @@
       color: white;
     }
 
-    th input {
+    th input, th select {
       margin-top: 5px;
       width: 100%;
       padding: 4px;
@@ -85,7 +85,6 @@
       display: none;
     }
 
-    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
@@ -176,9 +175,9 @@
           return;
         }
 
-        // Header row + filter row
         const headerRow = document.createElement('tr');
         const filterRow = document.createElement('tr');
+        const columnFilters = [];
 
         rows[0].forEach((headerText, index) => {
           if (!hiddenColumns.includes(headerText)) {
@@ -187,13 +186,26 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
-            // Filter input
             const filterTh = document.createElement('th');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-            input.placeholder = `Search ${headerText}`;
-            filterTh.appendChild(input);
+
+            if (headerText.toLowerCase() === "building") {
+              const select = document.createElement('select');
+              select.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
+              const defaultOption = document.createElement('option');
+              defaultOption.value = '';
+              defaultOption.textContent = 'All Buildings';
+              select.appendChild(defaultOption);
+              filterTh.appendChild(select);
+              columnFilters.push(select);
+            } else {
+              const input = document.createElement('input');
+              input.type = 'text';
+              input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
+              input.placeholder = `Search ${headerText}`;
+              filterTh.appendChild(input);
+              columnFilters.push(input);
+            }
+
             filterRow.appendChild(filterTh);
           }
         });
@@ -229,20 +241,44 @@
           return tr;
         });
 
-        // Filtering
-        const filterInputs = thead.querySelectorAll('input');
-        filterInputs.forEach(input => {
+        // Populate Building dropdown
+        const buildingColIndex = rows[0].findIndex(h => h.toLowerCase() === "building");
+        const buildingValues = new Set();
+        rows.slice(1).forEach(row => {
+          const val = row[buildingColIndex];
+          if (val && val.trim() !== '') buildingValues.add(val.trim());
+        });
+
+        const buildingSelect = columnFilters.find(el => el.tagName === 'SELECT');
+        if (buildingSelect) {
+          Array.from(buildingValues).sort().forEach(building => {
+            const option = document.createElement('option');
+            option.value = building.toLowerCase();
+            option.textContent = building;
+            buildingSelect.appendChild(option);
+          });
+        }
+
+        // Filtering logic
+        columnFilters.forEach((input, colIndex) => {
           input.addEventListener('input', () => {
-            const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
+            const filters = columnFilters.map(el =>
+              el.tagName === 'SELECT' ? el.value.toLowerCase() : el.value.toLowerCase()
+            );
 
             allDataRows.forEach(row => {
               const cells = Array.from(row.querySelectorAll('td'));
-              const matches = filters.every((filter, colIndex) => {
-                return cells[colIndex].textContent.toLowerCase().includes(filter);
+              const matches = filters.every((filter, i) => {
+                if (!filter) return true;
+                return cells[i].textContent.toLowerCase().includes(filter);
               });
               row.classList.toggle('hide', !matches);
             });
           });
+
+          if (input.tagName === 'SELECT') {
+            input.addEventListener('change', () => input.dispatchEvent(new Event('input')));
+          }
         });
       })
       .catch(error => {
