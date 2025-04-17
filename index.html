@@ -128,6 +128,8 @@
       overflow-y: auto;
       display: none;
       z-index: 9999;
+      width: 100%;  /* Ensure dropdown takes up the full width */
+      box-sizing: border-box; /* Avoid overflow issues */
     }
 
     .multi-select-dropdown-content label {
@@ -139,12 +141,14 @@
       color: #333; /* dark readable text */
       font-size: 14px;
       gap: 8px;
+      width: 100%;  /* Ensures label and checkbox take the full width */
     }
 
     .multi-select-dropdown-content input[type="checkbox"] {
       flex-shrink: 0;
       margin: 0;
       vertical-align: middle; /* Ensures checkbox is aligned left */
+      width: auto; /* Avoid stretching the checkbox */
     }
 
     .multi-select-dropdown-content label:hover {
@@ -294,14 +298,13 @@
           return tr;
         });
 
-        // Set allowed buildings manually
+        // Populate Building filter dropdown
         const allowedBuildings = [
           "Administration", "Arbor Hills", "Central Trail", "Highland", "Hill View", "Maplewood", 
           "McCord", "Northview", "Southview", "Stranahan", "Sylvan", "Timberstone", "Whiteford", 
           "Support Services"
         ];
-
-        allowedBuildings.sort();  // Sort buildings alphabetically
+        allowedBuildings.sort();
 
         allowedBuildings.forEach(building => {
           const label = document.createElement('label');
@@ -344,7 +347,6 @@
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
-
     document.getElementById('lightbox-modal').onclick = (e) => {
       if (e.target === document.getElementById('lightbox-modal')) {
         document.getElementById('lightbox-modal').style.display = 'none';
