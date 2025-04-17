@@ -107,10 +107,12 @@
       cursor: pointer;
     }
 
+    /* Multi-select Dropdown Styles */
     .multi-select-dropdown {
       position: relative;
       display: inline-block;
       width: 100%;
+      margin-bottom: 10px;
     }
 
     .multi-select-dropdown button {
@@ -122,6 +124,7 @@
       cursor: pointer;
       text-align: left;
       box-sizing: border-box;
+      color: black;
     }
 
     .multi-select-dropdown-content {
@@ -140,6 +143,7 @@
     .multi-select-dropdown-content label {
       display: block;
       font-size: 14px;
+      color: black;
     }
 
     .multi-select-dropdown-content input {
@@ -174,6 +178,13 @@
   </style>
 </head>
 <body>
+
+  <div class="multi-select-dropdown">
+    <button>Filter Buildings</button>
+    <div class="multi-select-dropdown-content">
+      <!-- Dropdown content will be populated dynamically -->
+    </div>
+  </div>
 
   <div class="table-container">
     <table id="sheetTable">
