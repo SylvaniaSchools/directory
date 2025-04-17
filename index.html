@@ -92,51 +92,18 @@
       cursor: pointer;
     }
 
-    /* Multi-select Dropdown Styles */
-    .multi-select-dropdown {
-      position: relative;
-      display: inline-block;
-      width: 100%;
+    .search-box {
       margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
     }
 
-    .multi-select-dropdown button {
-      width: 100%;
-      padding: 8px;
+    .search-box input {
+      width: 80%;
+      padding: 10px;
       font-size: 14px;
       border: 1px solid #ccc;
-      background-color: #f4f4f4;
-      cursor: pointer;
-      text-align: left;
-      box-sizing: border-box;
-      color: black;
-    }
-
-    .multi-select-dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: white;
-      min-width: 100%;
-      z-index: 1;
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      padding: 8px;
-    }
-
-    .multi-select-dropdown-content label {
-      display: block;
-      font-size: 14px;
-      color: black;
-    }
-
-    .multi-select-dropdown-content input {
-      margin-right: 5px;
-    }
-
-    .multi-select-dropdown:hover .multi-select-dropdown-content {
-      display: block;
+      border-radius: 5px;
     }
 
     @media (max-width: 600px) {
@@ -163,6 +130,10 @@
   </style>
 </head>
 <body>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search for names, buildings, or other details..." />
+  </div>
 
   <div class="table-container">
     <table id="sheetTable">
@@ -211,26 +182,11 @@
             visibleColumnIndexes.push(index);
 
             const filterTh = document.createElement('th');
-            if (headerText.toLowerCase() === "building") {
-              // Add dropdown filter in building column
-              const wrapper = document.createElement('div');
-              wrapper.className = 'multi-select-dropdown';
-              const button = document.createElement('button');
-              button.textContent = 'Filter Buildings';
-
-              const dropdown = document.createElement('div');
-              dropdown.className = 'multi-select-dropdown-content';
-              wrapper.appendChild(button);
-              wrapper.appendChild(dropdown);
-              filterTh.appendChild(wrapper);
-            } else {
-              const input = document.createElement('input');
-              input.type = 'text';
-              input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-              input.placeholder = `Search ${headerText}`;
-              filterTh.appendChild(input);
-            }
-
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
+            input.placeholder = `Search ${headerText}`;
+            filterTh.appendChild(input);
             filterRow.appendChild(filterTh);
           }
         });
@@ -266,42 +222,16 @@
           return tr;
         });
 
-        const allowedBuildings = [
-          "Administration", "Arbor Hills", "Central Trail", "Highland", "Hill View", "Maplewood", 
-          "McCord", "Northview", "Southview", "Stranahan", "Sylvan", "Timberstone", "Whiteford", 
-          "Support Services"
-        ];
-        allowedBuildings.sort();
-
-        allowedBuildings.forEach(building => {
-          const label = document.createElement('label');
-          const input = document.createElement('input');
-          input.type = 'checkbox';
-          input.value = building;
-
-          label.appendChild(input);
-          label.appendChild(document.createTextNode(building));
-
-          input.addEventListener('change', () => {
-            filterRowsByBuilding();
-          });
-
-          document.querySelector('.multi-select-dropdown-content').appendChild(label);
-        });
-
-        function filterRowsByBuilding() {
-          const selectedBuildings = Array.from(document.querySelectorAll('.multi-select-dropdown-content input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value.toLowerCase());
+        // Simple search input logic
+        document.getElementById('searchInput').addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
 
           allDataRows.forEach(row => {
-            const buildingCell = row.querySelector('td:nth-child(2)'); // assuming building is in the second column
-            if (buildingCell) {
-              const staffBuildings = buildingCell.textContent.toLowerCase().split(',').map(b => b.trim());
-              const matches = selectedBuildings.some(building => staffBuildings.includes(building));
-              row.classList.toggle('hide', !matches);
-            }
+            const cells = Array.from(row.querySelectorAll('td'));
+            const matches = cells.some(cell => cell.textContent.toLowerCase().includes(searchTerm));
+            row.classList.toggle('hide', !matches);
           });
-        }
+        });
       })
       .catch(error => {
         console.error('Error fetching sheet data:', error);
