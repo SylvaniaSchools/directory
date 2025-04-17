@@ -40,16 +40,12 @@
       border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      table-layout: auto;
     }
 
     th, td {
       padding: 12px 15px;
       border: 1px solid #ddd;
       text-align: left;
-      white-space: normal;
-      word-break: normal;
-      overflow-wrap: break-word;
       vertical-align: top;
       font-size: clamp(12px, 2vw, 16px);
     }
@@ -59,7 +55,7 @@
       color: white;
     }
 
-    th input, th select {
+    th input, th button {
       margin-top: 5px;
       width: 100%;
       padding: 4px;
@@ -85,6 +81,7 @@
       display: none;
     }
 
+    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
@@ -113,6 +110,34 @@
       font-size: 40px;
       font-weight: bold;
       cursor: pointer;
+    }
+
+    /* Multi-select dropdown */
+    .multi-select-dropdown {
+      position: relative;
+    }
+
+    .multi-select-dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      z-index: 9999;
+    }
+
+    .multi-select-dropdown-content label {
+      display: block;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .multi-select-dropdown-content label:hover {
+      background: #f0f0f0;
     }
 
     @media (max-width: 600px) {
@@ -148,7 +173,7 @@
     </table>
   </div>
 
-  <!-- Lightbox Modal HTML -->
+  <!-- Lightbox Modal -->
   <div id="lightbox-modal">
     <span id="lightbox-close">&times;</span>
     <img id="lightbox-img" src="" alt="Enlarged image">
@@ -189,21 +214,38 @@
             const filterTh = document.createElement('th');
 
             if (headerText.toLowerCase() === "building") {
-              const select = document.createElement('select');
-              select.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-              const defaultOption = document.createElement('option');
-              defaultOption.value = '';
-              defaultOption.textContent = 'All Buildings';
-              select.appendChild(defaultOption);
-              filterTh.appendChild(select);
-              columnFilters.push(select);
+              // Multi-select dropdown for Building
+              const wrapper = document.createElement('div');
+              wrapper.className = 'multi-select-dropdown';
+
+              const button = document.createElement('button');
+              button.textContent = 'Filter Buildings';
+
+              const dropdown = document.createElement('div');
+              dropdown.className = 'multi-select-dropdown-content';
+
+              wrapper.appendChild(button);
+              wrapper.appendChild(dropdown);
+              filterTh.appendChild(wrapper);
+              columnFilters.push({ type: 'multi', element: dropdown });
+
+              button.onclick = () => {
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+              };
+
+              document.addEventListener('click', e => {
+                if (!wrapper.contains(e.target)) {
+                  dropdown.style.display = 'none';
+                }
+              });
+
             } else {
               const input = document.createElement('input');
               input.type = 'text';
               input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
               input.placeholder = `Search ${headerText}`;
               filterTh.appendChild(input);
-              columnFilters.push(input);
+              columnFilters.push({ type: 'text', element: input });
             }
 
             filterRow.appendChild(filterTh);
@@ -213,7 +255,7 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
-        // Data rows
+        // Add data rows
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
           visibleColumnIndexes.forEach(index => {
@@ -241,43 +283,57 @@
           return tr;
         });
 
-        // Populate Building dropdown
-        const buildingColIndex = rows[0].findIndex(h => h.toLowerCase() === "building");
-        const buildingValues = new Set();
-        rows.slice(1).forEach(row => {
-          const val = row[buildingColIndex];
-          if (val && val.trim() !== '') buildingValues.add(val.trim());
-        });
+        // Set allowed buildings manually
+        const allowedBuildings = [
+          "Administration", "Arbor Hills", "Central Trail", "Highland", "Hill View",
+          "Maplewood", "McCord", "Northview", "Southview", "Stranahan",
+          "Support Services", "Sylvan", "Timberstone", "Whiteford"
+        ].sort();
 
-        const buildingSelect = columnFilters.find(el => el.tagName === 'SELECT');
-        if (buildingSelect) {
-          Array.from(buildingValues).sort().forEach(building => {
-            const option = document.createElement('option');
-            option.value = building.toLowerCase();
-            option.textContent = building;
-            buildingSelect.appendChild(option);
+        const buildingFilter = columnFilters.find(f => f.type === 'multi');
+        if (buildingFilter) {
+          allowedBuildings.forEach(building => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = building.toLowerCase();
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + building));
+            buildingFilter.element.appendChild(label);
           });
         }
 
-        // Filtering logic
-        columnFilters.forEach((input, colIndex) => {
-          input.addEventListener('input', () => {
-            const filters = columnFilters.map(el =>
-              el.tagName === 'SELECT' ? el.value.toLowerCase() : el.value.toLowerCase()
-            );
-
-            allDataRows.forEach(row => {
-              const cells = Array.from(row.querySelectorAll('td'));
-              const matches = filters.every((filter, i) => {
-                if (!filter) return true;
-                return cells[i].textContent.toLowerCase().includes(filter);
-              });
-              row.classList.toggle('hide', !matches);
-            });
+        function applyFilters() {
+          const filters = columnFilters.map(f => {
+            if (f.type === 'multi') {
+              return Array.from(f.element.querySelectorAll('input:checked')).map(cb => cb.value);
+            } else {
+              return f.element.value.toLowerCase();
+            }
           });
 
-          if (input.tagName === 'SELECT') {
-            input.addEventListener('change', () => input.dispatchEvent(new Event('input')));
+          allDataRows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td'));
+            const matches = filters.every((filter, i) => {
+              if (!filter || (Array.isArray(filter) && filter.length === 0)) return true;
+              const cellText = cells[i].textContent.toLowerCase();
+              if (Array.isArray(filter)) {
+                return filter.includes(cellText);
+              } else {
+                return cellText.includes(filter);
+              }
+            });
+            row.classList.toggle('hide', !matches);
+          });
+        }
+
+        columnFilters.forEach(f => {
+          if (f.type === 'multi') {
+            f.element.querySelectorAll('input').forEach(cb => {
+              cb.addEventListener('change', applyFilters);
+            });
+          } else {
+            f.element.addEventListener('input', applyFilters);
           }
         });
       })
@@ -286,16 +342,16 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Lightbox close logic
+    // Lightbox close
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
+
     document.getElementById('lightbox-modal').onclick = (e) => {
       if (e.target === document.getElementById('lightbox-modal')) {
         document.getElementById('lightbox-modal').style.display = 'none';
       }
     };
   </script>
-
 </body>
 </html>
