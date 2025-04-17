@@ -171,14 +171,18 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
-            // Create filter input for each column in header row
-            const filterTh = document.createElement('th');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-            input.placeholder = `Search ${headerText}`;
-            filterTh.appendChild(input);
-            filterRow.appendChild(filterTh);
+            // Exclude the photo column (first column) from having a filter
+            if (index !== 0) {
+              const filterTh = document.createElement('th');
+              const input = document.createElement('input');
+              input.type = 'text';
+              input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
+              input.placeholder = `Search ${headerText}`;
+              filterTh.appendChild(input);
+              filterRow.appendChild(filterTh);
+            } else {
+              filterRow.appendChild(document.createElement('th')); // Empty cell for the photo column
+            }
           }
         });
 
