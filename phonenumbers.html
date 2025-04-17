@@ -14,6 +14,10 @@
             padding: 10px;
             margin: 10px 0;
         }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -37,7 +41,8 @@
         <option value="transportation">Transportation</option>
     </select>
 
-    <p id="contact-info"></p>
+    <h3>Contact Information:</h3>
+    <pre id="contact-info"></pre>
 
     <script>
         const schoolData = {
@@ -47,4 +52,27 @@
             'hill-view': 'Hill View Elementary\nPhone: 419-824-8612',
             'maplewood': 'Maplewood Elementary\nPhone: 419-824-8613',
             'mccord': 'McCord Junior High\nPhone: 419-824-8650; Guidance Office, x4298',
-            'northview': 'Northview High School\nPhone: 419-824-8570\nLink to Guidance Office\nAth
+            'northview': 'Northview High School\nPhone: 419-824-8570\nLink to Guidance Office\nAthletic Director x5113',
+            'southview': 'Southview High School\nPhone: 419-824-8580\nGuidance Office, x6112\nAthletic Director, x6115',
+            'stranahan': 'Stranahan Elementary\nPhone: 419-824-8614',
+            'sylvan': 'Sylvan Elementary\nPhone: 419-824-8615',
+            'timberstone': 'Timberstone Junior High\nPhone: 419-824-8680',
+            'whiteford': 'Whiteford Elementary\nPhone: 419-824-8616',
+            'admin-building': 'Administration Building\nPhone: 419-824-8500 (Press 1-Connect to a School; Press 2-Connect to a Department)',
+            'transportation': 'Transportation\nPhone: 419-824-8686'
+        };
+
+        const schoolSelect = document.getElementById('school-select');
+        const contactInfo = document.getElementById('contact-info');
+
+        schoolSelect.addEventListener('change', function() {
+            const selectedSchool = schoolSelect.value;
+            if (selectedSchool) {
+                contactInfo.textContent = schoolData[selectedSchool];
+            } else {
+                contactInfo.textContent = '';  // Clear when no option is selected
+            }
+        });
+    </script>
+</body>
+</html>
