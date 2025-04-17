@@ -40,28 +40,23 @@
       border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      table-layout: auto;
     }
 
     th, td {
       padding: 12px 15px;
       border: 1px solid #ddd;
       text-align: left;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: break-word;
       vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px);
+      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
     }
 
     th {
       background-color: #007BFF;
       color: white;
-    }
-
-    th input, th button {
-      margin-top: 5px;
-      width: 100%;
-      padding: 4px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
     }
 
     caption {
@@ -112,47 +107,47 @@
       cursor: pointer;
     }
 
-    /* Multi-select dropdown */
     .multi-select-dropdown {
       position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .multi-select-dropdown button {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      background-color: #f4f4f4;
+      cursor: pointer;
+      text-align: left;
+      box-sizing: border-box;
     }
 
     .multi-select-dropdown-content {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 1px solid #ccc;
-      max-height: 200px;
-      overflow-y: auto;
       display: none;
-      z-index: 9999;
-      width: 100%;  /* Ensure dropdown takes up the full width */
-      box-sizing: border-box; /* Avoid overflow issues */
+      position: absolute;
+      background-color: white;
+      min-width: 100%;
+      z-index: 1;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      box-sizing: border-box;
+      padding: 8px;
     }
 
     .multi-select-dropdown-content label {
-      display: flex;
-      align-items: center;
-      white-space: nowrap;      /* Prevent text from wrapping */
-      padding: 6px 10px;
-      cursor: pointer;
-      color: #333; /* dark readable text */
+      display: block;
       font-size: 14px;
-      gap: 8px;
-      width: 100%;  /* Ensures label and checkbox take the full width */
     }
 
-    .multi-select-dropdown-content input[type="checkbox"] {
-      flex-shrink: 0;
-      margin: 0;
-      vertical-align: middle; /* Ensures checkbox is aligned left */
-      width: auto; /* Avoid stretching the checkbox */
+    .multi-select-dropdown-content input {
+      margin-right: 5px;
     }
 
-    .multi-select-dropdown-content label:hover {
-      background: #f0f0f0;
+    .multi-select-dropdown:hover .multi-select-dropdown-content {
+      display: block;
     }
 
     @media (max-width: 600px) {
@@ -188,7 +183,7 @@
     </table>
   </div>
 
-  <!-- Lightbox Modal -->
+  <!-- Lightbox Modal HTML -->
   <div id="lightbox-modal">
     <span id="lightbox-close">&times;</span>
     <img id="lightbox-img" src="" alt="Enlarged image">
@@ -217,7 +212,6 @@
 
         const headerRow = document.createElement('tr');
         const filterRow = document.createElement('tr');
-        const columnFilters = [];
 
         rows[0].forEach((headerText, index) => {
           if (!hiddenColumns.includes(headerText)) {
@@ -227,9 +221,7 @@
             visibleColumnIndexes.push(index);
 
             const filterTh = document.createElement('th');
-
             if (headerText.toLowerCase() === "building") {
-              // Multi-select dropdown for Building
               const wrapper = document.createElement('div');
               wrapper.className = 'multi-select-dropdown';
 
@@ -242,25 +234,12 @@
               wrapper.appendChild(button);
               wrapper.appendChild(dropdown);
               filterTh.appendChild(wrapper);
-              columnFilters.push({ type: 'multi', element: dropdown });
-
-              button.onclick = () => {
-                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-              };
-
-              document.addEventListener('click', e => {
-                if (!wrapper.contains(e.target)) {
-                  dropdown.style.display = 'none';
-                }
-              });
-
             } else {
               const input = document.createElement('input');
               input.type = 'text';
               input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
               input.placeholder = `Search ${headerText}`;
               filterTh.appendChild(input);
-              columnFilters.push({ type: 'text', element: input });
             }
 
             filterRow.appendChild(filterTh);
@@ -270,7 +249,6 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
-        // Add data rows
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
           visibleColumnIndexes.forEach(index => {
@@ -298,7 +276,6 @@
           return tr;
         });
 
-        // Populate Building filter dropdown
         const allowedBuildings = [
           "Administration", "Arbor Hills", "Central Trail", "Highland", "Hill View", "Maplewood", 
           "McCord", "Northview", "Southview", "Stranahan", "Sylvan", "Timberstone", "Whiteford", 
@@ -315,16 +292,13 @@
           label.appendChild(input);
           label.appendChild(document.createTextNode(building));
 
-          // Attach event listener for filtering rows by building
           input.addEventListener('change', () => {
             filterRowsByBuilding();
           });
 
-          // Append to dropdown
           document.querySelector('.multi-select-dropdown-content').appendChild(label);
         });
 
-        // Filtering logic based on checkbox selection
         function filterRowsByBuilding() {
           const selectedBuildings = Array.from(document.querySelectorAll('.multi-select-dropdown-content input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value.toLowerCase());
@@ -332,8 +306,11 @@
           allDataRows.forEach(row => {
             const buildingCell = row.querySelector('td:nth-child(1)'); // assuming building is in the first column
             if (buildingCell) {
-              const buildingName = buildingCell.textContent.toLowerCase();
-              row.classList.toggle('hide', !selectedBuildings.includes(buildingName));
+              const staffBuildings = buildingCell.textContent.toLowerCase().split(',').map(b => b.trim());
+
+              const matches = selectedBuildings.some(building => staffBuildings.includes(building));
+
+              row.classList.toggle('hide', !matches);
             }
           });
         }
@@ -343,10 +320,10 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Lightbox close logic
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
+
     document.getElementById('lightbox-modal').onclick = (e) => {
       if (e.target === document.getElementById('lightbox-modal')) {
         document.getElementById('lightbox-modal').style.display = 'none';
