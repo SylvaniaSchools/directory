@@ -130,23 +130,25 @@
       z-index: 9999;
     }
 
-  .multi-select-dropdown-content label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-  color: #333; /* dark readable text */
-  font-size: 14px;
-}
+    .multi-select-dropdown-content label {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;      /* Prevent text from wrapping */
+      padding: 6px 10px;
+      cursor: pointer;
+      color: #333; /* dark readable text */
+      font-size: 14px;
+      gap: 8px;
+    }
 
-.multi-select-dropdown-content input[type="checkbox"] {
-  margin: 0;
-}
+    .multi-select-dropdown-content input[type="checkbox"] {
+      flex-shrink: 0;
+      margin: 0;
+    }
 
-.multi-select-dropdown-content label:hover {
-  background: #f0f0f0;
-}
+    .multi-select-dropdown-content label:hover {
+      background: #f0f0f0;
+    }
 
     @media (max-width: 600px) {
       th, td {
@@ -350,16 +352,16 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Lightbox close
+    // Lightbox close logic
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
-
     document.getElementById('lightbox-modal').onclick = (e) => {
       if (e.target === document.getElementById('lightbox-modal')) {
         document.getElementById('lightbox-modal').style.display = 'none';
       }
     };
   </script>
+
 </body>
 </html>
