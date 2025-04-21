@@ -36,7 +36,7 @@
       word-break: normal;
       overflow-wrap: break-word;
       vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px);
+      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
     }
 
     th {
@@ -61,6 +61,7 @@
       display: none;
     }
 
+    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
@@ -124,7 +125,6 @@
 </head>
 <body>
 
-  <!-- Table Container -->
   <div class="table-container">
     <table id="sheetTable">
       <caption>Sylvania Schools Staff Directory</caption>
@@ -143,7 +143,7 @@
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
     const sheetName = 'DisplayedData';
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+    const url = https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey};
 
     fetch(url)
       .then(response => response.json())
@@ -171,11 +171,12 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
+            // Create filter input for each column in header row
             const filterTh = document.createElement('th');
             const input = document.createElement('input');
             input.type = 'text';
             input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-            input.placeholder = `Search ${headerText}`;
+            input.placeholder = Search ${headerText};
             filterTh.appendChild(input);
             filterRow.appendChild(filterTh);
           }
@@ -184,6 +185,65 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
+        // Populate table with data
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
-          visibleColumnIndexes.forEach(index =>
+          visibleColumnIndexes.forEach(index => {
+            const cellText = row[index] || '';
+            const td = document.createElement('td');
+
+            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+              const img = document.createElement('img');
+              img.src = cellText;
+              img.alt = 'Image';
+              img.title = 'Click to view full-size';
+              img.classList.add('clickable-img');
+              img.onclick = () => {
+                document.getElementById('lightbox-img').src = cellText;
+                document.getElementById('lightbox-modal').style.display = 'block';
+              };
+              td.appendChild(img);
+            } else {
+              td.textContent = cellText;
+            }
+
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+          return tr;
+        });
+
+        // Filtering functionality
+        const filterInputs = thead.querySelectorAll('input');
+        filterInputs.forEach(input => {
+          input.addEventListener('input', () => {
+            const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
+
+            allDataRows.forEach(row => {
+              const cells = Array.from(row.querySelectorAll('td'));
+              const matches = filters.every((filter, colIndex) => {
+                return cells[colIndex].textContent.toLowerCase().includes(filter);
+              });
+              row.classList.toggle('hide', !matches);
+            });
+          });
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching sheet data:', error);
+        document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
+      });
+
+    // Lightbox close logic
+    document.getElementById('lightbox-close').onclick = () => {
+      document.getElementById('lightbox-modal').style.display = 'none';
+    };
+    document.getElementById('lightbox-modal').onclick = (e) => {
+      if (e.target === document.getElementById('lightbox-modal')) {
+        document.getElementById('lightbox-modal').style.display = 'none';
+      }
+    };
+  </script>
+
+</body>
+</html>
