@@ -7,27 +7,27 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       margin: 0;
+      padding: 0;
       background: #f4f4f4;
+      height: 100%;  /* Ensure full height */
+      overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
     .table-container {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      max-width: 100%;
-      box-sizing: border-box;
+      margin: 0;
     }
 
     table {
       width: 100%;
-      min-width: 600px;
+      table-layout: fixed;
       margin: auto;
       border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      table-layout: fixed; /* Fixed layout to prevent columns from expanding too much */
     }
 
     th, td {
@@ -36,9 +36,7 @@
       text-align: left;
       white-space: normal;
       word-break: break-word;
-      overflow-wrap: break-word;
-      vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
+      font-size: clamp(12px, 2vw, 16px);
     }
 
     th {
@@ -121,18 +119,6 @@
         font-size: 30px;
         top: 10px;
         right: 20px;
-      }
-    }
-
-    /* Ensure table resizes in a smaller viewport */
-    @media (max-width: 800px) {
-      table {
-        width: 100%;
-        font-size: 14px; /* Adjust font-size for smaller screens */
-      }
-
-      th, td {
-        padding: 8px 10px;
       }
     }
   </style>
@@ -243,7 +229,7 @@
           });
         });
 
-        // Send height after the table loads
+        // Send the resized iframe height after table is populated
         window.parent.postMessage({
           type: 'resize-iframe',
           height: document.documentElement.scrollHeight
