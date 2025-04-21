@@ -142,8 +142,8 @@
   <script>
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
-    const sheetName = 'DisplayedData';
-    const url = https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey};
+    const sheetName = 'Test';
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
 
     fetch(url)
       .then(response => response.json())
@@ -152,7 +152,7 @@
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         const rows = data.values;
-        const hiddenColumns = ["CheckName"];
+        const hiddenColumns = ["Check Value"];
         const visibleColumnIndexes = [];
 
         if (!rows || rows.length === 0) {
@@ -176,7 +176,7 @@
             const input = document.createElement('input');
             input.type = 'text';
             input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-            input.placeholder = Search ${headerText};
+            input.placeholder = `Search ${headerText}`;
             filterTh.appendChild(input);
             filterRow.appendChild(filterTh);
           }
