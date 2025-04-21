@@ -12,21 +12,6 @@
       background: #f4f4f4;
     }
 
-    .scroll-sync {
-      overflow-x: auto;
-      overflow-y: hidden;
-      height: 20px;
-      width: 100%;
-    }
-
-    .scroll-top {
-      margin-bottom: 5px;
-    }
-
-    .scroll-bottom {
-      overflow-x: auto;
-    }
-
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -139,11 +124,8 @@
 </head>
 <body>
 
-  <!-- Top Scrollbar -->
-  <div class="scroll-sync scroll-top"></div>
-
-  <!-- Table Container with Bottom Scrollbar -->
-  <div class="table-container scroll-sync scroll-bottom">
+  <!-- Table Container -->
+  <div class="table-container">
     <table id="sheetTable">
       <caption>Sylvania Schools Staff Directory</caption>
       <thead></thead>
@@ -170,7 +152,7 @@
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         const rows = data.values;
-        const hiddenColumns = ["CheckName"]; // 👈 Hide this column
+        const hiddenColumns = ["CheckName"];
         const visibleColumnIndexes = [];
 
         if (!rows || rows.length === 0) {
@@ -189,7 +171,6 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
-            // Filter input
             const filterTh = document.createElement('th');
             const input = document.createElement('input');
             input.type = 'text';
@@ -203,76 +184,6 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
-        // Populate table with data
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
-          visibleColumnIndexes.forEach(index => {
-            const cellText = row[index] || '';
-            const td = document.createElement('td');
-
-            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
-              const img = document.createElement('img');
-              img.src = cellText;
-              img.alt = 'Image';
-              img.title = 'Click to view full-size';
-              img.classList.add('clickable-img');
-              img.onclick = () => {
-                document.getElementById('lightbox-img').src = cellText;
-                document.getElementById('lightbox-modal').style.display = 'block';
-              };
-              td.appendChild(img);
-            } else {
-              td.textContent = cellText;
-            }
-
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-          return tr;
-        });
-
-        // Filtering
-        const filterInputs = thead.querySelectorAll('input');
-        filterInputs.forEach(input => {
-          input.addEventListener('input', () => {
-            const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
-            allDataRows.forEach(row => {
-              const cells = Array.from(row.querySelectorAll('td'));
-              const matches = filters.every((filter, colIndex) => {
-                return cells[colIndex].textContent.toLowerCase().includes(filter);
-              });
-              row.classList.toggle('hide', !matches);
-            });
-          });
-        });
-
-        // Setup top scrollbar sync
-        const original = document.querySelector('.scroll-bottom');
-        const clone = document.querySelector('.scroll-top');
-        clone.innerHTML = '<div style="width:' + original.scrollWidth + 'px;height:1px;"></div>';
-
-        clone.addEventListener('scroll', () => {
-          original.scrollLeft = clone.scrollLeft;
-        });
-        original.addEventListener('scroll', () => {
-          clone.scrollLeft = original.scrollLeft;
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching sheet data:', error);
-        document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
-      });
-
-    // Lightbox close logic
-    document.getElementById('lightbox-close').onclick = () => {
-      document.getElementById('lightbox-modal').style.display = 'none';
-    };
-    document.getElementById('lightbox-modal').onclick = (e) => {
-      if (e.target === document.getElementById('lightbox-modal')) {
-        document.getElementById('lightbox-modal').style.display = 'none';
-      }
-    };
-  </script>
-
-</body>
-</html>
+          visibleColumnIndexes.forEach(index =>
