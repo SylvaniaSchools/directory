@@ -12,6 +12,21 @@
       background: #f4f4f4;
     }
 
+    .scroll-sync {
+      overflow-x: auto;
+      overflow-y: hidden;
+      height: 20px;
+      width: 100%;
+    }
+
+    .scroll-top {
+      margin-bottom: 5px;
+    }
+
+    .scroll-bottom {
+      overflow-x: auto;
+    }
+
     .table-container {
       width: 100%;
       overflow-x: auto;
@@ -36,7 +51,7 @@
       word-break: normal;
       overflow-wrap: break-word;
       vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
+      font-size: clamp(12px, 2vw, 16px);
     }
 
     th {
@@ -61,7 +76,6 @@
       display: none;
     }
 
-    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
@@ -125,7 +139,11 @@
 </head>
 <body>
 
-  <div class="table-container">
+  <!-- Top Scrollbar -->
+  <div class="scroll-sync scroll-top"></div>
+
+  <!-- Table Container with Bottom Scrollbar -->
+  <div class="table-container scroll-sync scroll-bottom">
     <table id="sheetTable">
       <caption>Sylvania Schools Staff Directory</caption>
       <thead></thead>
@@ -152,7 +170,7 @@
         const thead = table.querySelector('thead');
         const tbody = table.querySelector('tbody');
         const rows = data.values;
-        const hiddenColumns = ["CheckName"];
+        const hiddenColumns = ["CheckName"]; // 👈 Hide this column
         const visibleColumnIndexes = [];
 
         if (!rows || rows.length === 0) {
@@ -171,7 +189,7 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
-            // Create filter input for each column in header row
+            // Filter input
             const filterTh = document.createElement('th');
             const input = document.createElement('input');
             input.type = 'text';
@@ -213,12 +231,11 @@
           return tr;
         });
 
-        // Filtering functionality
+        // Filtering
         const filterInputs = thead.querySelectorAll('input');
         filterInputs.forEach(input => {
           input.addEventListener('input', () => {
             const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
-
             allDataRows.forEach(row => {
               const cells = Array.from(row.querySelectorAll('td'));
               const matches = filters.every((filter, colIndex) => {
@@ -227,6 +244,18 @@
               row.classList.toggle('hide', !matches);
             });
           });
+        });
+
+        // Setup top scrollbar sync
+        const original = document.querySelector('.scroll-bottom');
+        const clone = document.querySelector('.scroll-top');
+        clone.innerHTML = '<div style="width:' + original.scrollWidth + 'px;height:1px;"></div>';
+
+        clone.addEventListener('scroll', () => {
+          original.scrollLeft = clone.scrollLeft;
+        });
+        original.addEventListener('scroll', () => {
+          clone.scrollLeft = original.scrollLeft;
         });
       })
       .catch(error => {
