@@ -228,6 +228,12 @@
             });
           });
         });
+
+        // ✅ Send height only after table is populated
+        window.parent.postMessage({
+          type: 'resize-iframe',
+          height: document.documentElement.scrollHeight
+        }, '*');
       })
       .catch(error => {
         console.error('Error fetching sheet data:', error);
@@ -244,11 +250,5 @@
       }
     };
   </script>
-<script>
-  window.addEventListener('load', () => {
-    const height = document.documentElement.scrollHeight;
-    parent.postMessage({ type: 'resize-iframe', height: height }, '*');
-  });
-</script>
 </body>
 </html>
