@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       background: #f4f4f4;
-      height: 100%;  /* Ensure full height */
+      height: 100%;
       overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
@@ -23,7 +23,7 @@
 
     table {
       width: 100%;
-      table-layout: fixed;
+      table-layout: fixed; /* Fixed column width */
       margin: auto;
       border-collapse: collapse;
       background: white;
@@ -37,6 +37,7 @@
       white-space: normal;
       word-break: break-word;
       font-size: clamp(12px, 2vw, 16px);
+      overflow-wrap: break-word;
     }
 
     th {
@@ -93,7 +94,7 @@
     }
 
     .search-box input {
-      width: 80%;
+      width: 100%; /* Ensure it takes up the full column width */
       padding: 10px;
       font-size: 14px;
       border: 1px solid #ccc;
