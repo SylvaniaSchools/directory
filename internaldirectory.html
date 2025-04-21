@@ -5,26 +5,40 @@
   <title>Sylvania Schools Staff Directory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+    html, body {
+      height: 100%;
       margin: 0;
+      font-family: Arial, sans-serif;
       background: #f4f4f4;
     }
 
-    .table-container {
-      width: 100%;
+    .content {
+      padding: 20px;
+      padding-bottom: 80px; /* Space for bottom scroll bar */
+    }
+
+    .fixed-scrollbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow-y: hidden;
+      background: #fff;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 999;
+    }
+
+    .table-wrapper {
+      width: max-content;
+      min-width: 100%;
     }
 
     table {
       width: 100%;
       min-width: 600px;
-      margin: auto;
       border-collapse: collapse;
       background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       table-layout: auto;
     }
 
@@ -36,7 +50,7 @@
       word-break: normal;
       overflow-wrap: break-word;
       vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
+      font-size: clamp(12px, 2vw, 16px);
     }
 
     th {
@@ -61,7 +75,6 @@
       display: none;
     }
 
-    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
@@ -125,12 +138,20 @@
 </head>
 <body>
 
-  <div class="table-container">
-    <table id="sheetTable">
-      <caption>Sylvania Schools Staff Directory</caption>
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+  <!-- Page content above table -->
+  <div class="content">
+    <h2>Sylvania Schools Staff Directory</h2>
+    <p>Use the filters to search staff by name, title, building, or more.</p>
+  </div>
+
+  <!-- Fixed Scrollbar Table -->
+  <div class="fixed-scrollbar">
+    <div class="table-wrapper">
+      <table id="sheetTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Lightbox Modal HTML -->
@@ -160,7 +181,6 @@
           return;
         }
 
-        // Create header row + filter row
         const headerRow = document.createElement('tr');
         const filterRow = document.createElement('tr');
 
@@ -171,7 +191,6 @@
             headerRow.appendChild(th);
             visibleColumnIndexes.push(index);
 
-            // Create filter input for each column in header row
             const filterTh = document.createElement('th');
             const input = document.createElement('input');
             input.type = 'text';
@@ -185,7 +204,6 @@
         thead.appendChild(headerRow);
         thead.appendChild(filterRow);
 
-        // Populate table with data
         const allDataRows = rows.slice(1).map(row => {
           const tr = document.createElement('tr');
           visibleColumnIndexes.forEach(index => {
@@ -197,7 +215,6 @@
               img.src = cellText;
               img.alt = 'Image';
               img.title = 'Click to view full-size';
-              img.classList.add('clickable-img');
               img.onclick = () => {
                 document.getElementById('lightbox-img').src = cellText;
                 document.getElementById('lightbox-modal').style.display = 'block';
@@ -213,17 +230,15 @@
           return tr;
         });
 
-        // Filtering functionality
         const filterInputs = thead.querySelectorAll('input');
         filterInputs.forEach(input => {
           input.addEventListener('input', () => {
             const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
-
             allDataRows.forEach(row => {
               const cells = Array.from(row.querySelectorAll('td'));
-              const matches = filters.every((filter, colIndex) => {
-                return cells[colIndex].textContent.toLowerCase().includes(filter);
-              });
+              const matches = filters.every((filter, colIndex) =>
+                cells[colIndex].textContent.toLowerCase().includes(filter)
+              );
               row.classList.toggle('hide', !matches);
             });
           });
@@ -234,7 +249,6 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Lightbox close logic
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
