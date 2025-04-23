@@ -17,8 +17,23 @@
       text-align: center;
       font-size: 2rem;
       font-weight: 600;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       color: #007BFF;
+    }
+
+    .search-box {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .search-box input {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .card-container {
@@ -85,11 +100,20 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    .hide {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
 
   <h1 class="directory-title">Sylvania Schools Staff Directory</h1>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search staff...">
+  </div>
+
   <div class="card-container" id="staffCards"></div>
 
   <!-- Lightbox Modal -->
@@ -103,6 +127,8 @@
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
     const sheetName = 'Test';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+    let allCards = [];
 
     fetch(url)
       .then(response => response.json())
@@ -128,6 +154,7 @@
           const card = document.createElement('div');
           card.className = 'staff-card';
           let imgAdded = false;
+          let searchText = '';
 
           visibleIndexes.forEach(i => {
             const cell = row[i] || '';
@@ -153,18 +180,30 @@
             if (!cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
               const p = document.createElement('p');
               p.innerHTML = `<strong>${header}:</strong> ${cell}`;
+              searchText += ' ' + cell.toLowerCase();
               infoDiv.appendChild(p);
             }
           });
 
+          card.setAttribute('data-search', searchText.trim());
           card.appendChild(infoDiv);
           container.appendChild(card);
+          allCards.push(card);
         });
       })
       .catch(error => {
         console.error('Error fetching sheet data:', error);
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const search = this.value.toLowerCase().trim();
+      allCards.forEach(card => {
+        const match = card.getAttribute('data-search').includes(search);
+        card.classList.toggle('hide', !match);
+      });
+    });
 
     // Lightbox close
     document.getElementById('lightbox-close').onclick = () => {
