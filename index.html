@@ -7,25 +7,27 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       margin: 0;
+      padding: 0;
       background: #f4f4f4;
+      height: 100%;
+      overflow-x: hidden; /* Prevent horizontal scrolling */
     }
 
     .table-container {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      margin: 0;
     }
 
     table {
       width: 100%;
-      min-width: 600px;
+      table-layout: fixed; /* Fixed column width */
       margin: auto;
       border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      table-layout: auto;
     }
 
     th, td {
@@ -33,10 +35,9 @@
       border: 1px solid #ddd;
       text-align: left;
       white-space: normal;
-      word-break: normal;
+      word-break: break-word;
+      font-size: clamp(12px, 2vw, 16px);
       overflow-wrap: break-word;
-      vertical-align: top;
-      font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
     }
 
     th {
@@ -93,7 +94,7 @@
     }
 
     .search-box input {
-      width: 80%;
+      width: 100%; /* Ensure it takes up the full column width */
       padding: 10px;
       font-size: 14px;
       border: 1px solid #ccc;
@@ -142,7 +143,7 @@
   <script>
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
-    const sheetName = 'Test';
+    const sheetName = 'DisplayedData';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
 
     fetch(url)
@@ -228,6 +229,12 @@
             });
           });
         });
+
+        // Send the resized iframe height after table is populated
+        window.parent.postMessage({
+          type: 'resize-iframe',
+          height: document.documentElement.scrollHeight
+        }, '*');
       })
       .catch(error => {
         console.error('Error fetching sheet data:', error);
@@ -244,6 +251,5 @@
       }
     };
   </script>
-
 </body>
 </html>
