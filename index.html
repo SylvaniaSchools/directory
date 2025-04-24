@@ -23,10 +23,11 @@
 
     .search-box {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
-    .search-box input {
+    .search-box input,
+    .search-box select {
       width: 80%;
       max-width: 400px;
       padding: 10px;
@@ -34,6 +35,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
     }
 
     .card-container {
@@ -111,7 +113,22 @@
   <h1 class="directory-title">Sylvania Schools Staff Directory</h1>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search staff...">
+    <input type="text" id="searchInput" placeholder="Search name, position, email..."><br>
+    <select id="buildingFilter">
+      <option value="">All Buildings</option>
+      <option>Northview</option>
+      <option>Southview</option>
+      <option>Arbor Hills</option>
+      <option>McCord</option>
+      <option>Timberstone</option>
+      <option>Central Trail</option>
+      <option>Highland</option>
+      <option>Hill View</option>
+      <option>Maplewood</option>
+      <option>Stranahan</option>
+      <option>Sylvan</option>
+      <option>Whiteford</option>
+    </select>
   </div>
 
   <div class="card-container" id="staffCards"></div>
@@ -137,6 +154,7 @@
         const rows = data.values;
         const hiddenColumns = ["CheckName"];
         let visibleIndexes = [];
+        let buildingIndex = -1;
 
         if (!rows || rows.length === 0) {
           container.innerHTML = '<p>No data found</p>';
@@ -145,8 +163,12 @@
 
         const headers = rows[0];
         headers.forEach((header, i) => {
+          const cleanHeader = header.trim().toLowerCase();
           if (!hiddenColumns.includes(header)) {
             visibleIndexes.push(i);
+            if (cleanHeader === 'building') {
+              buildingIndex = i;
+            }
           }
         });
 
@@ -155,6 +177,7 @@
           card.className = 'staff-card';
           let imgAdded = false;
           let searchText = '';
+          let buildingText = '';
 
           visibleIndexes.forEach(i => {
             const cell = row[i] || '';
@@ -176,16 +199,18 @@
 
           visibleIndexes.forEach(i => {
             const header = headers[i];
-            const cell = row[i];
+            const cell = row[i] || '';
             if (!cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
               const p = document.createElement('p');
               p.innerHTML = `<strong>${header}:</strong> ${cell}`;
               searchText += ' ' + cell.toLowerCase();
+              if (i === buildingIndex) buildingText = cell.trim();
               infoDiv.appendChild(p);
             }
           });
 
           card.setAttribute('data-search', searchText.trim());
+          card.setAttribute('data-building', buildingText.toLowerCase());
           card.appendChild(infoDiv);
           container.appendChild(card);
           allCards.push(card);
@@ -196,16 +221,20 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Search filter
-    document.getElementById('searchInput').addEventListener('input', function () {
-      const search = this.value.toLowerCase().trim();
-      allCards.forEach(card => {
-        const match = card.getAttribute('data-search').includes(search);
-        card.classList.toggle('hide', !match);
-      });
-    });
+    function filterCards() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const building = document.getElementById('buildingFilter').value.toLowerCase();
 
-    // Lightbox close
+      allCards.forEach(card => {
+        const matchesSearch = card.getAttribute('data-search').includes(search);
+        const matchesBuilding = !building || card.getAttribute('data-building') === building;
+        card.classList.toggle('hide', !(matchesSearch && matchesBuilding));
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterCards);
+    document.getElementById('buildingFilter').addEventListener('change', filterCards);
+
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
