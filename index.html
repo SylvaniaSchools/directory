@@ -6,81 +6,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
       margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      height: 100%;
-      overflow-x: hidden; /* Prevent horizontal scrolling */
+      padding: 20px;
+      color: #333;
     }
 
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 0;
-    }
-
-    table {
-      width: 100%;
-      table-layout: fixed; /* Fixed column width */
-      margin: auto;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      text-align: left;
-      white-space: normal;
-      word-break: break-word;
-      font-size: clamp(12px, 2vw, 16px);
-      overflow-wrap: break-word;
-    }
-
-    th {
-      background-color: #007BFF;
-      color: white;
-    }
-
-    caption {
-      margin-bottom: 10px;
-      font-size: 1.5em;
-      font-weight: bold;
+    .directory-title {
       text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #007BFF;
     }
 
-    img {
-      max-width: 100px;
-      max-height: 80px;
+    .search-box {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .search-box input {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .staff-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .staff-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .staff-card img {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      margin-bottom: 15px;
       cursor: pointer;
     }
 
-    tr.hide {
-      display: none;
+    .staff-info p {
+      margin: 4px 0;
+      font-size: 0.95rem;
     }
 
-    /* Lightbox Modal */
     #lightbox-modal {
       display: none;
       position: fixed;
       z-index: 1000;
-      padding-top: 60px;
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.85);
+      padding-top: 60px;
     }
 
     #lightbox-modal img {
-      margin: auto;
       display: block;
+      margin: auto;
       max-width: 90%;
       max-height: 80%;
+      border-radius: 10px;
     }
 
     #lightbox-modal span {
@@ -93,48 +101,22 @@
       cursor: pointer;
     }
 
-    .search-box input {
-      width: 100%; /* Ensure it takes up the full column width */
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    @media (max-width: 600px) {
-      th, td {
-        font-size: 14px;
-        padding: 8px 10px;
-      }
-
-      caption {
-        font-size: 1.2em;
-      }
-
-      img {
-        max-width: 80px;
-        max-height: 60px;
-      }
-
-      #lightbox-modal span {
-        font-size: 30px;
-        top: 10px;
-        right: 20px;
-      }
+    .hide {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-  <div class="table-container">
-    <table id="sheetTable">
-      <caption>Sylvania Schools Staff Directory</caption>
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+  <h1 class="directory-title">Sylvania Schools Staff Directory</h1>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search staff...">
   </div>
 
-  <!-- Lightbox Modal HTML -->
+  <div class="card-container" id="staffCards"></div>
+
+  <!-- Lightbox Modal -->
   <div id="lightbox-modal">
     <span id="lightbox-close">&times;</span>
     <img id="lightbox-img" src="" alt="Enlarged image">
@@ -143,105 +125,87 @@
   <script>
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
     const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
-    const sheetName = 'DisplayedData';
+    const sheetName = 'Test';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+    let allCards = [];
 
     fetch(url)
       .then(response => response.json())
       .then(data => {
-        const table = document.getElementById('sheetTable');
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
+        const container = document.getElementById('staffCards');
         const rows = data.values;
         const hiddenColumns = ["CheckName"];
-        const visibleColumnIndexes = [];
+        let visibleIndexes = [];
 
         if (!rows || rows.length === 0) {
-          table.innerHTML = '<tr><td>No data found</td></tr>';
+          container.innerHTML = '<p>No data found</p>';
           return;
         }
 
-        // Create header row + filter row
-        const headerRow = document.createElement('tr');
-        const filterRow = document.createElement('tr');
-
-        rows[0].forEach((headerText, index) => {
-          if (!hiddenColumns.includes(headerText)) {
-            const th = document.createElement('th');
-            th.textContent = headerText;
-            headerRow.appendChild(th);
-            visibleColumnIndexes.push(index);
-
-            // Create filter input for each column in header row
-            const filterTh = document.createElement('th');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-            input.placeholder = `Search ${headerText}`;
-            filterTh.appendChild(input);
-            filterRow.appendChild(filterTh);
+        const headers = rows[0];
+        headers.forEach((header, i) => {
+          if (!hiddenColumns.includes(header)) {
+            visibleIndexes.push(i);
           }
         });
 
-        thead.appendChild(headerRow);
-        thead.appendChild(filterRow);
+        rows.slice(1).forEach(row => {
+          const card = document.createElement('div');
+          card.className = 'staff-card';
+          let imgAdded = false;
+          let searchText = '';
 
-        // Populate table with data
-        const allDataRows = rows.slice(1).map(row => {
-          const tr = document.createElement('tr');
-          visibleColumnIndexes.forEach(index => {
-            const cellText = row[index] || '';
-            const td = document.createElement('td');
-
-            if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+          visibleIndexes.forEach(i => {
+            const cell = row[i] || '';
+            if (!imgAdded && cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
               const img = document.createElement('img');
-              img.src = cellText;
-              img.alt = 'Image';
-              img.title = 'Click to view full-size';
-              img.classList.add('clickable-img');
+              img.src = cell;
+              img.alt = 'Staff image';
               img.onclick = () => {
-                document.getElementById('lightbox-img').src = cellText;
+                document.getElementById('lightbox-img').src = cell;
                 document.getElementById('lightbox-modal').style.display = 'block';
               };
-              td.appendChild(img);
-            } else {
-              td.textContent = cellText;
+              card.appendChild(img);
+              imgAdded = true;
             }
-
-            tr.appendChild(td);
           });
-          tbody.appendChild(tr);
-          return tr;
-        });
 
-        // Filtering functionality
-        const filterInputs = thead.querySelectorAll('input');
-        filterInputs.forEach(input => {
-          input.addEventListener('input', () => {
-            const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'staff-info';
 
-            allDataRows.forEach(row => {
-              const cells = Array.from(row.querySelectorAll('td'));
-              const matches = filters.every((filter, colIndex) => {
-                return cells[colIndex].textContent.toLowerCase().includes(filter);
-              });
-              row.classList.toggle('hide', !matches);
-            });
+          visibleIndexes.forEach(i => {
+            const header = headers[i];
+            const cell = row[i];
+            if (!cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+              const p = document.createElement('p');
+              p.innerHTML = `<strong>${header}:</strong> ${cell}`;
+              searchText += ' ' + cell.toLowerCase();
+              infoDiv.appendChild(p);
+            }
           });
-        });
 
-        // Send the resized iframe height after table is populated
-        window.parent.postMessage({
-          type: 'resize-iframe',
-          height: document.documentElement.scrollHeight
-        }, '*');
+          card.setAttribute('data-search', searchText.trim());
+          card.appendChild(infoDiv);
+          container.appendChild(card);
+          allCards.push(card);
+        });
       })
       .catch(error => {
         console.error('Error fetching sheet data:', error);
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    // Lightbox close logic
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', function () {
+      const search = this.value.toLowerCase().trim();
+      allCards.forEach(card => {
+        const match = card.getAttribute('data-search').includes(search);
+        card.classList.toggle('hide', !match);
+      });
+    });
+
+    // Lightbox close
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
     };
@@ -251,5 +215,6 @@
       }
     };
   </script>
+
 </body>
 </html>
