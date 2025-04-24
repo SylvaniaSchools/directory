@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Contact Directory and Staff Directory</title>
+    <title>School Contact Directory</title>
     <style>
-        /* First page styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f6f8;
@@ -15,7 +14,6 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            flex-direction: column;
         }
 
         .container {
@@ -25,7 +23,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
-            margin-bottom: 20px;
         }
 
         h1 {
@@ -65,122 +62,18 @@
             display: none;
         }
 
-        /* Second page styles */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            min-width: 600px;
-            margin: auto;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            table-layout: auto;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
-            white-space: normal;
-            word-break: normal;
-            overflow-wrap: break-word;
-            vertical-align: top;
-            font-size: clamp(12px, 2vw, 16px); /* Responsive font-size */
-        }
-
-        th {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        caption {
-            margin-bottom: 10px;
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        img {
-            max-width: 100px;
-            max-height: 80px;
-            cursor: pointer;
-        }
-
-        tr.hide {
-            display: none;
-        }
-
-        /* Lightbox Modal */
-        #lightbox-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            padding-top: 60px;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        #lightbox-modal img {
-            margin: auto;
-            display: block;
-            max-width: 90%;
-            max-height: 80%;
-        }
-
-        #lightbox-modal span {
-            position: absolute;
-            top: 20px;
-            right: 35px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .search-box input {
-            width: 80%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
         @media (max-width: 600px) {
-            th, td {
-                font-size: 14px;
-                padding: 8px 10px;
+            .container {
+                padding: 20px;
             }
 
-            caption {
-                font-size: 1.2em;
-            }
-
-            img {
-                max-width: 80px;
-                max-height: 60px;
-            }
-
-            #lightbox-modal span {
-                font-size: 30px;
-                top: 10px;
-                right: 20px;
+            h1 {
+                font-size: 22px;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- First Section: School Contact Directory -->
     <div class="container">
         <h1>School Contact Directory</h1>
         <label for="school-select">Select a school or department:</label>
@@ -205,20 +98,6 @@
         <div id="contact-info" class="info-box"></div>
     </div>
 
-    <!-- Second Section: Staff Directory Table -->
-    <div class="table-container">
-        <table id="sheetTable">
-            <caption>Sylvania Schools Staff Directory</caption>
-            <thead></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- Lightbox Modal for Images -->
-    <div id="lightbox-modal">
-        <span id="lightbox-close">&times;</span>
-        <img id="lightbox-img" src="" alt="Enlarged image">
-    </div>
     <script>
         const schoolData = {
             'arbor-hills': '📍 Arbor Hills Junior High\n📞 419-824-8640\n🎓 Guidance Office, x4104',
@@ -245,113 +124,6 @@
             contactInfo.textContent = schoolData[selected] || '';
         });
     </script>
-
-    <script>
-        // Fetching and displaying Staff Directory data
-        const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
-        const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
-        const sheetName = 'Test';
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const table = document.getElementById('sheetTable');
-                const thead = table.querySelector('thead');
-                const tbody = table.querySelector('tbody');
-                const rows = data.values;
-                const hiddenColumns = ["CheckName"];
-                const visibleColumnIndexes = [];
-
-                if (!rows || rows.length === 0) {
-                    table.innerHTML = '<tr><td>No data found</td></tr>';
-                    return;
-                }
-
-                // Create header row + filter row
-                const headerRow = document.createElement('tr');
-                const filterRow = document.createElement('tr');
-
-                rows[0].forEach((headerText, index) => {
-                    if (!hiddenColumns.includes(headerText)) {
-                        const th = document.createElement('th');
-                        th.textContent = headerText;
-                        headerRow.appendChild(th);
-                        visibleColumnIndexes.push(index);
-
-                        // Create filter input for each column in header row
-                        const filterTh = document.createElement('th');
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.setAttribute('data-col-index', visibleColumnIndexes.length - 1);
-                        input.placeholder = `Search ${headerText}`;
-                        filterTh.appendChild(input);
-                        filterRow.appendChild(filterTh);
-                    }
-                });
-
-                thead.appendChild(headerRow);
-                thead.appendChild(filterRow);
-
-                // Populate table with data
-                const allDataRows = rows.slice(1).map(row => {
-                    const tr = document.createElement('tr');
-                    visibleColumnIndexes.forEach(index => {
-                        const cellText = row[index] || '';
-                        const td = document.createElement('td');
-
-                        if (typeof cellText === 'string' && cellText.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
-                            const img = document.createElement('img');
-                            img.src = cellText;
-                            img.alt = 'Image';
-                            img.title = 'Click to view full-size';
-                            img.classList.add('clickable-img');
-                            img.onclick = () => {
-                                document.getElementById('lightbox-img').src = cellText;
-                                document.getElementById('lightbox-modal').style.display = 'block';
-                            };
-                            td.appendChild(img);
-                        } else {
-                            td.textContent = cellText;
-                        }
-
-                        tr.appendChild(td);
-                    });
-                    tbody.appendChild(tr);
-                    return tr;
-                });
-
-                // Filtering functionality
-                const filterInputs = thead.querySelectorAll('input');
-                filterInputs.forEach(input => {
-                    input.addEventListener('input', () => {
-                        const filters = Array.from(filterInputs).map(input => input.value.toLowerCase());
-
-                        allDataRows.forEach(row => {
-                            const cells = Array.from(row.querySelectorAll('td'));
-                            const matches = filters.every((filter, colIndex) => {
-                                return cells[colIndex].textContent.toLowerCase().includes(filter);
-                            });
-                            row.classList.toggle('hide', !matches);
-                        });
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching sheet data:', error);
-                document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
-            });
-
-        // Lightbox close logic
-        document.getElementById('lightbox-close').onclick = () => {
-            document.getElementById('lightbox-modal').style.display = 'none';
-        };
-        document.getElementById('lightbox-modal').onclick = (e) => {
-            if (e.target === document.getElementById('lightbox-modal')) {
-                document.getElementById('lightbox-modal').style.display = 'none';
-            }
-        };
-    </script>
-
 </body>
 </html>
+
