@@ -9,7 +9,6 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha512-XQoYMqMTK8LvdlxUM0zQ06pO0r+V2UjxsI1hZozZzAAI+HH+L3AnZLNL+8Odjz+M9RHjE6Z6kJKMbGsYdUKrpg=="
     crossorigin=""
   />
 
@@ -26,10 +25,20 @@
       color: #333;
     }
 
+    #school-select {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      font-size: 1.2rem;
+      width: 300px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
     #school-map {
       height: 600px;
       max-width: 1000px;
-      margin: 30px auto;
+      margin: 0 auto;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
@@ -38,14 +47,15 @@
 <body>
 
   <h1>Sylvania Schools Building Directory (Map View)</h1>
+
+  <select id="school-select">
+    <option value="">-- Select a Building --</option>
+  </select>
+
   <div id="school-map"></div>
 
   <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha512-Jxm4IYZlZ+ZkRoxkExVnC4Y9J9LzDMPU9f5K4Zyp+IzUXMbi+o+1QqMtxzUAEyNlX2tK6zB5jEmeRWz66k8tPg=="
-    crossorigin=""
-  ></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script>
     const buildings = {
@@ -135,21 +145,41 @@
       }
     };
 
-    // Initialize the map centered on Sylvania, OH
+    // Initialize map
     const map = L.map('school-map').setView([41.6938, -83.6753], 13);
 
-    // Load and display tile layer
+    // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add markers for each building
+    const markerMap = {};
+
+    // Add markers and populate dropdown
+    const dropdown = document.getElementById('school-select');
     for (const key in buildings) {
       const b = buildings[key];
-      L.marker([b.lat, b.lng])
+      const marker = L.marker([b.lat, b.lng])
         .addTo(map)
         .bindPopup(`<strong>${b.name}</strong><br>${b.info}`);
+
+      markerMap[key] = marker;
+
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = b.name;
+      dropdown.appendChild(option);
     }
+
+    // Zoom and open popup on select
+    dropdown.addEventListener('change', function () {
+      const selectedKey = this.value;
+      if (selectedKey && markerMap[selectedKey]) {
+        const b = buildings[selectedKey];
+        map.setView([b.lat, b.lng], 15);
+        markerMap[selectedKey].openPopup();
+      }
+    });
   </script>
 </body>
 </html>
