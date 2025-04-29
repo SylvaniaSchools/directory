@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sylvania Schools Directory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background: #007BFF;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: #e9ecef;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    .tabs button.active {
+      background: #ffffff;
+      border-bottom: 3px solid #007BFF;
+      font-weight: bold;
+    }
+
+    .content-section {
+      display: none;
+      padding: 20px;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    /* Map styles */
+    #school-select {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      font-size: 1.2rem;
+      width: 300px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    #school-map {
+      display: none;
+      height: 600px;
+      max-width: 1000px;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* Staff directory styles */
+    .search-box {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .search-box input,
+    .search-box select {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .staff-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .staff-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .staff-card img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .staff-info p {
+      margin: 4px 0;
+      font-size: 0.95rem;
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    #lightbox-modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.85);
+      padding-top: 60px;
+    }
+
+    #lightbox-modal img {
+      display: block;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+    }
+
+    #lightbox-modal span {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sylvania Schools Directory</h1>
+  </header>
+
+  <div class="tabs">
+    <button class="active" onclick="showSection('map')">Map View</button>
+    <button onclick="showSection('staff')">Staff Directory</button>
+  </div>
+
+  <!-- Map Section -->
+  <div id="map" class="content-section active">
+    <select id="school-select">
+      <option value="">-- Select a Building --</option>
+    </select>
+    <div id="school-map"></div>
+  </div>
+
+  <!-- Staff Section -->
+  <div id="staff" class="content-section">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search name, position, email..."><br>
+      <select id="buildingFilter">
+        <option value="">All Buildings</option>
+        <option>Administration</option>
+        <option>Support Services</option>
+        <option>Northview</option>
+        <option>Southview</option>
+        <option>Arbor Hills</option>
+        <option>McCord</option>
+        <option>Timberstone</option>
+        <option>Central Trail</option>
+        <option>Highland</option>
+        <option>Hill View</option>
+        <option>Maplewood</option>
+        <option>Stranahan</option>
+        <option>Sylvan</option>
+        <option>Whiteford</option>
+      </select>
+    </div>
+    <div class="card-container" id="staffCards"></div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox-modal">
+    <span id="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="Enlarged image">
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tabs button[onclick="showSection('${id}')"]`).classList.add('active');
+    }
+
+    const buildings = {
+      "arbor-hills": { name: "Arbor Hills Junior High", lat: 41.71200, lng: -83.66364, info: "📍 5334 Whiteford Rd, Sylvania, OH 43560<br>📞 419-824-8640" },
+      "central-trail": { name: "Central Trail Elementary", lat: 41.69348, lng: -83.76354, info: "📍 4321 Mitchaw Rd, Sylvania, OH 43560<br>📞 419-824-8610" },
+      "highland": { name: "Highland Elementary", lat: 41.71936, lng: -83.73004, info: "📍 7720 Erie St, Sylvania, OH 43560<br>📞 419-824-8611" },
+      "hill-view": { name: "Hill View Elementary", lat: 41.71407, lng: -83.66433, info: "📍 5424 Whiteford Rd, Sylvania, OH 43560<br>📞 419-824-8612" },
+      "maplewood": { name: "Maplewood Elementary", lat: 41.71695, lng: -83.70770, info: "📍 6769 Maplewood Ave, Sylvania, OH 43560<br>📞 419-824-8613" },
+      "mccord": { name: "McCord Junior High", lat: 41.69490, lng: -83.70258, info: "📍 4304 N McCord Rd, Sylvania, OH 43560<br>📞 419-824-8650" },
+      "northview": { name: "Northview High School", lat: 41.71291, lng: -83.71044, info: "📍 5403 Silica Dr, Sylvania, OH 43560<br>📞 419-824-8570" },
+      "southview": { name: "Southview High School", lat: 41.68837, lng: -83.71647, info: "📍 7225 W Sylvania Ave, Sylvania, OH 43560<br>📞 419-824-8580" },
+      "stranahan": { name: "Stranahan Elementary", lat: 41.68818, lng: -83.68243, info: "📍 3840 N Holland Sylvania Rd, Toledo, OH 43615<br>📞 419-824-8614" },
+      "sylvan": { name: "Sylvan Elementary", lat: 41.70300, lng: -83.69898, info: "📍 4830 Wickford Dr E, Sylvania, OH 43560<br>📞 419-824-8615" },
+      "timberstone": { name: "Timberstone Junior High", lat: 41.68895, lng: -83.75931, info: "📍 9000 W Sylvania Ave, Sylvania, OH 43560<br>📞 419-824-8680" },
+      "whiteford": { name: "Whiteford Elementary", lat: 41.70156, lng: -83.66257, info: "📍 4708 Whiteford Rd, Toledo, OH 43623<br>📞 419-824-8616" },
+      "admin-building": { name: "Administration Building", lat: 41.70194, lng: -83.69459, info: "🏢 4747 N Holland Sylvania Rd, Sylvania, OH 43560<br>📞 419-824-8500" },
+      "transportation": { name: "Transportation Department", lat: 41.68686, lng: -83.72008, info: "🚌 7400 Cougar Ln, Sylvania, OH 43560<br>📞 419-824-8686" }
+    };
+
+    const map = L.map('school-map').setView([41.69490, -83.70258], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const dropdown = document.getElementById('school-select');
+    const markerMap = {};
+
+    for (const key in buildings) {
+      const b = buildings[key];
+      const marker = L.marker([b.lat, b.lng]).addTo(map).bindPopup(`<strong>${b.name}</strong><br>${b.info}`);
+      markerMap[key] = marker;
+
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = b.name;
+      dropdown.appendChild(option);
+    }
+
+    dropdown.addEventListener('change', function () {
+      const selectedKey = this.value;
+      const mapDiv = document.getElementById('school-map');
+
+      if (selectedKey && markerMap[selectedKey]) {
+        mapDiv.style.display = 'block';
+        map.invalidateSize();
+        const b = buildings[selectedKey];
+        map.setView([b.lat, b.lng], 15);
+        markerMap[selectedKey].openPopup();
+      } else {
+        mapDiv.style.display = 'none';
+        map.closePopup();
+      }
+    });
+
+    // Staff Directory Logic
+    const apiKey = 'YOUR_API_KEY_HERE';
+    const sheetId = '1agcVoG38kEIMIGgbgT_GU0aGWw2YyTxYsHvCs0QwSxE';
+    const sheetName = 'StaffDirectory';
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+    let allCards = [];
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('staffCards');
+        const rows = data.values;
+        if (!rows || rows.length === 0) {
+          container.innerHTML = '<p>No data found</p>';
+          return;
+        }
+
+        const headers = rows[0];
+        const visibleIndexes = [];
+        const hiddenColumns = ["CheckName","Last Name","First Name"];
+        let buildingIndex = -1;
+
+        headers.forEach((header, i) => {
+          const h = header.trim().toLowerCase();
+          if (!hiddenColumns.includes(header)) {
+            visibleIndexes.push(i);
+            if (h === 'building') buildingIndex = i;
+          }
+        });
+
+        rows.slice(1).forEach(row => {
+          const card = document.createElement('div');
+          card.className = 'staff-card';
+          let imgAdded = false;
+          let searchText = '';
+          let buildingText = '';
+
+          visibleIndexes.forEach(i => {
+            const cell = row[i] || '';
+            if (!imgAdded && cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+              const img = document.createElement('img');
+              img.src = cell;
+              img.alt = 'Staff image';
+              img.onclick = () => {
+                document.getElementById('lightbox-img').src = cell;
+                document.getElementById('lightbox-modal').style.display = 'block';
+              };
+              card.appendChild(img);
+              imgAdded = true;
+            }
+          });
+
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'staff-info';
+
+          visibleIndexes.forEach(i => {
+            const cell = row[i] || '';
+            const header = headers[i];
+            if (!cell.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+              const p = document.createElement('p');
+              p.innerHTML = `<strong>${header}:</strong> ${cell}`;
+              searchText += ' ' + cell.toLowerCase();
+              if (i === buildingIndex) buildingText = cell.trim();
+              infoDiv.appendChild(p);
+            }
+          });
+
+          card.setAttribute('data-search', searchText.trim());
+          card.setAttribute('data-building', buildingText.toLowerCase());
+          card.appendChild(infoDiv);
+          container.appendChild(card);
+          allCards.push(card);
+        });
+      });
+
+    function filterCards() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const building = document.getElementById('buildingFilter').value.toLowerCase();
+
+      allCards.forEach(card => {
+        const matchesSearch = card.getAttribute('data-search').includes(search);
+        const matchesBuilding = !building || card.getAttribute('data-building') === building;
+        card.classList.toggle('hide', !(matchesSearch && matchesBuilding));
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterCards);
+    document.getElementById('buildingFilter').addEventListener('change', filterCards);
+
+    document.getElementById('lightbox-close').onclick = () => {
+      document.getElementById('lightbox-modal').style.display = 'none';
+    };
+    document.getElementById('lightbox-modal').onclick = (e) => {
+      if (e.target === document.getElementById('lightbox-modal')) {
+        document.getElementById('lightbox-modal').style.display = 'none';
+      }
+    };
+  </script>
+
+</body>
+</html>
