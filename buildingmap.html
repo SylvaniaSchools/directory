@@ -145,8 +145,12 @@
       }
     };
 
+    // Initial map center and zoom
+    const initialCenter = [41.6938, -83.6753];
+    const initialZoom = 13;
+
     // Initialize map
-    const map = L.map('school-map').setView([41.6938, -83.6753], 13);
+    const map = L.map('school-map').setView(initialCenter, initialZoom);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -154,15 +158,14 @@
     }).addTo(map);
 
     const markerMap = {};
+    const dropdown = document.getElementById('school-select');
 
     // Add markers and populate dropdown
-    const dropdown = document.getElementById('school-select');
     for (const key in buildings) {
       const b = buildings[key];
       const marker = L.marker([b.lat, b.lng])
         .addTo(map)
         .bindPopup(`<strong>${b.name}</strong><br>${b.info}`);
-
       markerMap[key] = marker;
 
       const option = document.createElement('option');
@@ -171,13 +174,16 @@
       dropdown.appendChild(option);
     }
 
-    // Zoom and open popup on select
+    // Zoom to location or reset view on selection
     dropdown.addEventListener('change', function () {
       const selectedKey = this.value;
       if (selectedKey && markerMap[selectedKey]) {
         const b = buildings[selectedKey];
         map.setView([b.lat, b.lng], 15);
         markerMap[selectedKey].openPopup();
+      } else {
+        map.setView(initialCenter, initialZoom);
+        map.closePopup(); // Optional: Close any open popup
       }
     });
   </script>
