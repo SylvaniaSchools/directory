@@ -30,12 +30,13 @@
     }
 
     #school-map {
-      height: 600px;
-      max-width: 1000px;
-      margin: 0 auto 40px auto;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+  display: none;
+  height: 600px;
+  max-width: 1000px;
+  margin: 0 auto 40px auto;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
     .search-box {
       text-align: center;
@@ -207,16 +208,20 @@
     }
 
     dropdown.addEventListener('change', function () {
-      const selectedKey = this.value;
-      if (selectedKey && markerMap[selectedKey]) {
-        map.invalidateSize();
-        const b = buildings[selectedKey];
-        map.setView([b.lat, b.lng], 15);
-        markerMap[selectedKey].openPopup();
-      } else {
-        map.closePopup();
-      }
-    });
+  const selectedKey = this.value;
+  const mapDiv = document.getElementById('school-map');
+
+  if (selectedKey && markerMap[selectedKey]) {
+    mapDiv.style.display = 'block';
+    map.invalidateSize();
+    const b = buildings[selectedKey];
+    map.setView([b.lat, b.lng], 15);
+    markerMap[selectedKey].openPopup();
+  } else {
+    mapDiv.style.display = 'none';
+    map.closePopup();
+  }
+});
 
     // Staff Directory Fetch
     const apiKey = 'AIzaSyBBkOeFJ0wABZ2w0i2M3uxUMvd_Yk_i_Bw';
