@@ -36,6 +36,7 @@
     }
 
     #school-map {
+      display: none; /* Hidden initially */
       height: 600px;
       max-width: 1000px;
       margin: 0 auto;
@@ -177,15 +178,20 @@
     // Zoom to location or reset view on selection
     dropdown.addEventListener('change', function () {
       const selectedKey = this.value;
+      const mapDiv = document.getElementById('school-map');
+
       if (selectedKey && markerMap[selectedKey]) {
+        mapDiv.style.display = 'block'; // Show the map
+        map.invalidateSize(); // Ensure proper sizing when revealed
         const b = buildings[selectedKey];
         map.setView([b.lat, b.lng], 15);
         markerMap[selectedKey].openPopup();
       } else {
-        map.setView(initialCenter, initialZoom);
-        map.closePopup(); // Optional: Close any open popup
+        mapDiv.style.display = 'none'; // Hide the map if no selection
+        map.closePopup();
       }
     });
   </script>
+
 </body>
 </html>
