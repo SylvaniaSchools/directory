@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Building Directory - Map View</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha512-XQoYMqMTK8LvdlxUM0zQ06pO0r+V2UjxsI1hZozZzAAI+HH+L3AnZLNL+8Odjz+M9RHjE6Z6kJKMbGsYdUKrpg=="
+    crossorigin=""
+  />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #school-map {
+      height: 600px;
+      max-width: 1000px;
+      margin: 30px auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Sylvania Schools Building Directory (Map View)</h1>
+  <div id="school-map"></div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha512-Jxm4IYZlZ+ZkRoxkExVnC4Y9J9LzDMPU9f5K4Zyp+IzUXMbi+o+1QqMtxzUAEyNlX2tK6zB5jEmeRWz66k8tPg=="
+    crossorigin=""
+  ></script>
+
+  <script>
+    const buildings = {
+      "arbor-hills": {
+        name: "Arbor Hills Junior High",
+        lat: 41.7005,
+        lng: -83.7102,
+        info: "📍 Arbor Hills Junior High<br>📞 419-824-8640<br>🎓 Guidance Office, x4104"
+      },
+      "central-trail": {
+        name: "Central Trail Elementary",
+        lat: 41.6798,
+        lng: -83.7099,
+        info: "📍 Central Trail Elementary<br>📞 419-824-8610"
+      },
+      "highland": {
+        name: "Highland Elementary",
+        lat: 41.6782,
+        lng: -83.6777,
+        info: "📍 Highland Elementary<br>📞 419-824-8611"
+      },
+      "hill-view": {
+        name: "Hill View Elementary",
+        lat: 41.6885,
+        lng: -83.6799,
+        info: "📍 Hill View Elementary<br>📞 419-824-8612"
+      },
+      "maplewood": {
+        name: "Maplewood Elementary",
+        lat: 41.6821,
+        lng: -83.7141,
+        info: "📍 Maplewood Elementary<br>📞 419-824-8613"
+      },
+      "mccord": {
+        name: "McCord Junior High",
+        lat: 41.6930,
+        lng: -83.7158,
+        info: "📍 McCord Junior High<br>📞 419-824-8650<br>🎓 Guidance Office, x4298"
+      },
+      "northview": {
+        name: "Northview High School",
+        lat: 41.7063,
+        lng: -83.6937,
+        info: "📍 Northview High School<br>📞 419-824-8570<br>🎓 Guidance Office<br>🏅 Athletic Director x5113"
+      },
+      "southview": {
+        name: "Southview High School",
+        lat: 41.6789,
+        lng: -83.6321,
+        info: "📍 Southview High School<br>📞 419-824-8580<br>🎓 Guidance Office, x6112<br>🏅 Athletic Director, x6115"
+      },
+      "stranahan": {
+        name: "Stranahan Elementary",
+        lat: 41.6882,
+        lng: -83.6825,
+        info: "📍 Stranahan Elementary<br>📞 419-824-8614"
+      },
+      "sylvan": {
+        name: "Sylvan Elementary",
+        lat: 41.6901,
+        lng: -83.7037,
+        info: "📍 Sylvan Elementary<br>📞 419-824-8615"
+      },
+      "timberstone": {
+        name: "Timberstone Junior High",
+        lat: 41.7052,
+        lng: -83.7243,
+        info: "📍 Timberstone Junior High<br>📞 419-824-8680"
+      },
+      "whiteford": {
+        name: "Whiteford Elementary",
+        lat: 41.6983,
+        lng: -83.6844,
+        info: "📍 Whiteford Elementary<br>📞 419-824-8616"
+      },
+      "admin-building": {
+        name: "Administration Building",
+        lat: 41.6877,
+        lng: -83.6992,
+        info: "🏢 Administration Building<br>📞 419-824-8500<br>(Press 1 to connect to a school; Press 2 for a department)"
+      },
+      "transportation": {
+        name: "Transportation Department",
+        lat: 41.6966,
+        lng: -83.7198,
+        info: "🚌 Transportation Department<br>📞 419-824-8686"
+      }
+    };
+
+    // Initialize the map centered on Sylvania, OH
+    const map = L.map('school-map').setView([41.6938, -83.6753], 13);
+
+    // Load and display tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add markers for each building
+    for (const key in buildings) {
+      const b = buildings[key];
+      L.marker([b.lat, b.lng])
+        .addTo(map)
+        .bindPopup(`<strong>${b.name}</strong><br>${b.info}`);
+    }
+  </script>
+</body>
+</html>
