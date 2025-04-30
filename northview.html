@@ -204,19 +204,16 @@
         document.body.innerHTML = '<p style="color:red;">Failed to load data. Please check your sheet name and access settings.</p>';
       });
 
-    function filterCards() {
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
-      const building = document.getElementById('buildingFilter').value.toLowerCase();
+   function filterCards() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
 
-      allCards.forEach(card => {
-        const matchesSearch = card.getAttribute('data-search').includes(search);
-        const matchesBuilding = !building || card.getAttribute('data-building') === building;
-        card.classList.toggle('hide', !(matchesSearch && matchesBuilding));
-      });
-    }
+  allCards.forEach(card => {
+    const matchesSearch = card.getAttribute('data-search').includes(search);
+    card.classList.toggle('hide', !matchesSearch);
+  });
+}
 
     document.getElementById('searchInput').addEventListener('input', filterCards);
-    document.getElementById('buildingFilter').addEventListener('change', filterCards);
 
     document.getElementById('lightbox-close').onclick = () => {
       document.getElementById('lightbox-modal').style.display = 'none';
