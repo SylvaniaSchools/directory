@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Fullscreen Slides Kiosk",
+  "version": "1.0",
+  "app": {
+    "launch": {
+      "web_url": "https://docs.google.com/presentation/d/1cqEFBZzIAGua8oggjcByld_bHebP3_zAvEwLkMTD4uM/pub?start=true&loop=true&delayms=5000"
+    }
+  },
+  "icons": {
+    "128": "icon.png"
+  }
+}
